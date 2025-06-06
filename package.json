@@ -1,0 +1,68 @@
+{
+  "name": "@jhae/tsup-sequential-build-plugin",
+  "description": "A tsup/esbuild plugin that ensures dependent packages in monorepos are built in the correct sequence while maintaining parallel format compilation.",
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": {
+    "name": "JHAE",
+    "url": "https://github.com/jhae-de"
+  },
+  "homepage": "https://github.com/jhae-de/tsup-sequential-build-plugin",
+  "repository": {
+    "url": "git+https://github.com/jhae-de/tsup-sequential-build-plugin.git",
+    "type": "git"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./types/index.d.ts",
+  "exports": {
+    "types": "./types/index.d.ts",
+    "require": "./dist/index.cjs",
+    "default": "./dist/index.mjs"
+  },
+  "scripts": {
+    "build": "tsup",
+    "fix": "npm run-script fix:prettier && npm run-script fix:eslint",
+    "fix:eslint": "eslint --fix .",
+    "fix:prettier": "prettier . --write",
+    "lint": "npm run-script lint:prettier && npm run-script lint:eslint",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier . --check",
+    "prepack": "npm run-script build",
+    "test": "jest",
+    "test:coverage": "npm run-script test -- --coverage",
+    "test:watch": "npm run-script test -- --watchAll",
+    "test:watch:coverage": "npm run-script test:watch -- --coverage"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0",
+    "@types/jest": "^29.0",
+    "eslint": "^9.0",
+    "eslint-config-prettier": "^10.0",
+    "eslint-plugin-prettier": "^5.1",
+    "jest": "^29.0",
+    "prettier": "^3.0",
+    "ts-jest": "^29.2",
+    "tsup": "^8.0",
+    "typescript": "^5.5",
+    "typescript-eslint": "^8.0"
+  },
+  "peerDependencies": {
+    "tsup": "^8.0"
+  },
+  "keywords": [
+    "tsup",
+    "esbuild",
+    "plugin",
+    "monorepo",
+    "build",
+    "sequential",
+    "dependency",
+    "bundler",
+    "typescript",
+    "javascript",
+    "parallel",
+    "compilation"
+  ]
+}
