@@ -1,0 +1,10 @@
+# IDE
+/.idea/
+
+# Project
+/coverage/
+/dist/
+/node_modules/
+/types/
+/.bash-history
+/.env
