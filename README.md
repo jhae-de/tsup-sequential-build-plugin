@@ -88,29 +88,30 @@ ESM ⚡️ Build success in 2000ms
 
 ## How it works
 
-The plugin coordinates the build process across multiple packages and formats using a singleton build state manager.
+The plugin orchestrates the build process for monorepos by managing dependencies between packages:
 
-- **Registration**  
-  Each build (identified by a package identifier and the format, e.g., `main-cjs`) registers itself with the build state
-  manager at the start.
+- **Package registration**  
+  Each package registers itself with a unique identifier when the build process starts.
 
-- **Dependency detection**  
-  Before a build starts, it checks for other registered builds that do not belong to the same package. If any of these
-  are still pending, the build waits and periodically re-checks their status.
+- **Dependency resolution**  
+  When a package's build begins, it identifies dependencies based on the configuration order and waits for them to
+  complete before proceeding.
 
-- **Parallel format builds**  
-  Builds for different formats (e.g., `cjs`, `esm`) of the same package are allowed to run in parallel, as they do not
-  block each other.
+- **Parallel format compilation**  
+  Different formats (cjs, esm) of the same package build in parallel for efficiency, while maintaining the correct
+  dependency sequence between packages.
 
-- **Build start**  
-  Once all dependencies are resolved, the build proceeds and logs its status.
+- **Build coordination**  
+  The plugin tracks the status of all builds through a singleton state manager, ensuring that dependent packages only
+  start building after their dependencies have completed.
 
-- **Completion tracking**  
-  After finishing, the build marks itself as completed, allowing dependent builds to proceed.
+- **Sequential guarantee**  
+  Packages are built in the exact sequence specified in the tsup configuration, ensuring that dependencies are always
+  built before the packages that depend on them.
 
-- **Order guarantee**  
-  Packages are always built in the order they are configured in your `tsup` config, ensuring that dependencies are built
-  before dependents.
+- **Build status tracking**  
+  When a build completes, it updates its status in the shared state, allowing dependent packages to proceed with their
+  builds.
 
-This mechanism ensures correct build sequencing in monorepos, while maximizing parallelism for different formats within
-the same package.
+This approach maintains build integrity in complex monorepos while optimizing build performance through parallel format
+compilation.
