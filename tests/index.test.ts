@@ -26,7 +26,7 @@ type PluginTestSetup = {
  *
  * @returns {PluginTestSetup} An object containing the mocks and callbacks for testing the plugin
  */
-function setupPluginTest(packageIdentifier: string, format?: Format): PluginTestSetup {
+function setUpPluginTest(packageIdentifier: string, format?: Format): PluginTestSetup {
   let onStartCallback: OnStartCallback | undefined;
   const onStartMock: jest.Mock = jest.fn().mockImplementation((callback: OnStartCallback): void => {
     onStartCallback = callback;
@@ -77,7 +77,8 @@ afterAll((): void => void jest.restoreAllMocks());
 
 describe('SequentialBuildPlugin', (): void => {
   it('uses "unknown" when format is missing in options', (): void => {
-    const setup: PluginTestSetup = setupPluginTest('test-package');
+    // Set up plugin test
+    const setup: PluginTestSetup = setUpPluginTest('test-package');
     validatePluginSetup(setup);
 
     const { onStartCallback, onEndCallback }: PluginTestSetup = setup;
@@ -96,7 +97,8 @@ describe('SequentialBuildPlugin', (): void => {
   });
 
   it('starts build immediately when no dependencies exist', (): void => {
-    const setup: PluginTestSetup = setupPluginTest('test-package', 'esm');
+    // Set up plugin test
+    const setup: PluginTestSetup = setUpPluginTest('test-package', 'esm');
     validatePluginSetup(setup);
 
     const { onStartCallback, onEndCallback }: PluginTestSetup = setup;
@@ -117,7 +119,8 @@ describe('SequentialBuildPlugin', (): void => {
   it('ignores builds from the same package when checking dependencies', (): void => {
     buildStateManager.registerBuild('test-package-cjs');
 
-    const setup: PluginTestSetup = setupPluginTest('test-package', 'esm');
+    // Set up plugin test
+    const setup: PluginTestSetup = setUpPluginTest('test-package', 'esm');
     validatePluginSetup(setup);
 
     const { onStartCallback, onEndCallback }: PluginTestSetup = setup;
@@ -138,7 +141,8 @@ describe('SequentialBuildPlugin', (): void => {
   it('waits for dependencies before starting the build', async (): Promise<void> => {
     buildStateManager.registerBuild('dependency-build');
 
-    const setup: PluginTestSetup = setupPluginTest('test-package', 'esm');
+    // Set up plugin test
+    const setup: PluginTestSetup = setUpPluginTest('test-package', 'esm');
     validatePluginSetup(setup);
 
     const { onStartCallback }: PluginTestSetup = setup;
@@ -159,10 +163,95 @@ describe('SequentialBuildPlugin', (): void => {
     expect(await onStartCallbackResult).toBeUndefined();
   });
 
+  it('ignores non-dependent build completions', async (): Promise<void> => {
+    // Register a dependency build
+    buildStateManager.registerBuild('dependency-build');
+
+    // Set up plugin test
+    const setup: PluginTestSetup = setUpPluginTest('test-package', 'esm');
+    validatePluginSetup(setup);
+
+    const { onStartCallback }: PluginTestSetup = setup;
+
+    // Mock the unregister callback
+    const unregisterCallbackMock: jest.Mock = jest.fn();
+
+    // Start build
+    const onStartCallbackResult: OnStartCallbackResult | undefined = onStartCallback?.();
+
+    // Assert build starts with a promise
+    expect(onStartCallbackResult).toBeInstanceOf(Promise);
+
+    // Track when promise resolves
+    void onStartCallbackResult?.then(unregisterCallbackMock);
+
+    // Complete a non-dependent build
+    buildStateManager.registerBuild('non-dependent-build');
+    buildStateManager.completeBuild('non-dependent-build');
+
+    // Allow any microtasks to execute
+    await Promise.resolve();
+
+    // Assert callback hasn't been called
+    expect(unregisterCallbackMock).not.toHaveBeenCalled();
+
+    // Complete the dependency build
+    buildStateManager.completeBuild('dependency-build');
+
+    // Allow any microtasks to execute
+    await Promise.resolve();
+
+    // Assert callback has been called
+    expect(unregisterCallbackMock).toHaveBeenCalled();
+  });
+
+  it('waits for all dependencies to complete before resolving', async (): Promise<void> => {
+    // Register multiple dependency builds
+    buildStateManager.registerBuild('dependency-build-1');
+    buildStateManager.registerBuild('dependency-build-2');
+
+    // Set up plugin test
+    const setup: PluginTestSetup = setUpPluginTest('test-package', 'esm');
+    validatePluginSetup(setup);
+
+    const { onStartCallback }: PluginTestSetup = setup;
+
+    // Mock the unregister callback
+    const unregisterCallbackMock: jest.Mock = jest.fn();
+
+    // Start build
+    const onStartCallbackResult: OnStartCallbackResult | undefined = onStartCallback?.();
+
+    // Assert build starts with a promise
+    expect(onStartCallbackResult).toBeInstanceOf(Promise);
+
+    // Track when promise resolves
+    void onStartCallbackResult?.then(unregisterCallbackMock);
+
+    // Complete first dependency
+    buildStateManager.completeBuild('dependency-build-1');
+
+    // Allow any microtasks to execute
+    await Promise.resolve();
+
+    // Assert callback hasn't been called
+    expect(unregisterCallbackMock).not.toHaveBeenCalled();
+
+    // Complete second dependency
+    buildStateManager.completeBuild('dependency-build-2');
+
+    // Allow any microtasks to execute
+    await Promise.resolve();
+
+    // Assert callback has been called
+    expect(unregisterCallbackMock).toHaveBeenCalled();
+  });
+
   it('correctly identifies different packages with similar names', async (): Promise<void> => {
     buildStateManager.registerBuild('test-pack-esm');
 
-    const setup: PluginTestSetup = setupPluginTest('test-package', 'esm');
+    // Set up plugin test
+    const setup: PluginTestSetup = setUpPluginTest('test-package', 'esm');
     validatePluginSetup(setup);
 
     const { onStartCallback }: PluginTestSetup = setup;
@@ -184,7 +273,8 @@ describe('SequentialBuildPlugin', (): void => {
   });
 
   it('marks build as completed after build ends', (): void => {
-    const setup: PluginTestSetup = setupPluginTest('test-package', 'esm');
+    // Set up plugin test
+    const setup: PluginTestSetup = setUpPluginTest('test-package', 'esm');
     validatePluginSetup(setup);
 
     const { onStartCallback, onEndCallback }: PluginTestSetup = setup;

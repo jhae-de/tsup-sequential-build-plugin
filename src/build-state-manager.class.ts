@@ -24,6 +24,15 @@ export class BuildStateManager {
   private readonly completedBuilds: Set<string> = new Set<string>();
 
   /**
+   * A set of callbacks that are called when a build is completed.
+   * Callbacks are registered using the onBuildCompleted method and are called with the identifier of the completed
+   * build.
+   */
+  private readonly buildCompletionCallbacks: Set<(identifier: string) => void> = new Set<
+    (identifier: string) => void
+  >();
+
+  /**
    * Private constructor to prevent direct instantiation.
    * Ensures that the class can only be instantiated through the getInstance method.
    */
@@ -59,8 +68,8 @@ export class BuildStateManager {
   }
 
   /**
-   * Marks a build as completed by adding its identifier to the completed builds set.
-   * Throws an error if the build is not registered.
+   * Marks a build as completed with the given identifier.
+   * If the build is not registered, it throws an error. It also triggers all registered callbacks for build completion.
    *
    * @param {string} identifier - The identifier of the build to mark as completed
    *
@@ -71,7 +80,37 @@ export class BuildStateManager {
       throw new Error(`Build ${identifier} not registered`);
     }
 
+    if (this.completedBuilds.has(identifier)) {
+      return;
+    }
+
     this.completedBuilds.add(identifier);
+    this.buildCompletionCallbacks.forEach((callback: (identifier: string) => void): void => callback(identifier));
+  }
+
+  /**
+   * Registers a callback to be called when a build is completed.
+   * This allows external code to react to build completions, such as logging or triggering further actions. The
+   * callback will be called with the identifier of the completed build. Returns a function to unregister the callback.
+   *
+   * @example
+   * ```typescript
+   * const unregister: () => void = buildStateManager.onBuildCompleted((identifier: string): void => {
+   *   console.log(`Build ${identifier} completed`);
+   * });
+   *
+   * // Later, when you want to stop listening for build completions:
+   * unregister();
+   * ```
+   *
+   * @param {(identifier: string) => void} callback - The callback to be called when a build is completed
+   *
+   * @returns {() => void} A function that unregisters the callback when called
+   */
+  public onBuildCompleted(callback: (identifier: string) => void): () => void {
+    this.buildCompletionCallbacks.add(callback);
+
+    return (): void => void this.buildCompletionCallbacks.delete(callback);
   }
 
   /**
@@ -81,6 +120,7 @@ export class BuildStateManager {
   public clear(): void {
     this.registeredBuilds.clear();
     this.completedBuilds.clear();
+    this.buildCompletionCallbacks.clear();
   }
 
   /**
@@ -150,7 +190,7 @@ export class BuildStateManager {
    *
    * @returns {string[]} An array of identifiers for all registered builds
    */
-  public getRegisteredBuilds(): string[] {
+  public getRegisteredBuilds(): readonly string[] {
     return Array.from(this.registeredBuilds);
   }
 
@@ -159,7 +199,7 @@ export class BuildStateManager {
    *
    * @returns {string[]} An array of identifiers for all completed builds
    */
-  public getCompletedBuilds(): string[] {
+  public getCompletedBuilds(): readonly string[] {
     return Array.from(this.completedBuilds);
   }
 
@@ -169,7 +209,7 @@ export class BuildStateManager {
    *
    * @returns {string[]} An array of identifiers for all pending builds
    */
-  public getPendingBuilds(): string[] {
+  public getPendingBuilds(): readonly string[] {
     return this.getRegisteredBuilds().filter((identifier: string): boolean => !this.completedBuilds.has(identifier));
   }
 }

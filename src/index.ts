@@ -26,12 +26,13 @@ const createSequentialBuildPlugin: (packageIdentifier: string) => Plugin = (pack
     /**
      * Handles the start of the build process.
      *
-     * This function checks for dependencies by looking at the registered builds and completed builds. If there are
-     * pending builds that are not completed, it waits until all dependencies are resolved before proceeding. It logs
-     * the status of the build process, indicating when it is waiting for dependencies and when it starts the build.
+     * This function registers the current build with the BuildStateManager and checks for any pending builds that
+     * must complete before this one can start. If there are no pending builds, it starts the build immediately. If
+     * there are pending builds, it waits for them to complete before proceeding. It logs the status of the build
+     * process, indicating when it is waiting for dependencies and when it starts the build.
      *
-     * @returns {Promise<void> | undefined} A promise that resolves when dependencies are resolved, or undefined if
-     *   there are no dependencies
+     * @returns {Promise<void> | undefined} A promise that resolves when the build can start, or undefined if there
+     *   are no dependencies.
      */
     build.onStart((): Promise<void> | undefined => {
       console.log(`${logPrefix} ⏳ Waiting for dependencies...`);
@@ -44,28 +45,46 @@ const createSequentialBuildPlugin: (packageIdentifier: string) => Plugin = (pack
       const packageRegex: RegExp = new RegExp(`^${packageIdentifier}-[^-]+$`);
       const pendingBuilds: string[] = buildStateManager
         .getPendingBuilds()
-        .filter((id: string): boolean => !packageRegex.test(id));
+        .filter((identifier: string): boolean => !packageRegex.test(identifier));
 
-      // Start the build immediately if there are no pending builds
-      if (pendingBuilds.length === 0) {
+      /**
+       * Checks if all dependent builds are completed.
+       *
+       * @returns {boolean} True if all dependent builds are completed, false otherwise
+       */
+      const areDependentBuildsCompleted: () => boolean = (): boolean =>
+        pendingBuilds.every((identifier: string): boolean => buildStateManager.isBuildCompleted(identifier));
+
+      // Start the build immediately if there are no dependencies
+      if (areDependentBuildsCompleted()) {
         console.log(`${logPrefix} 🚀 No dependencies, starting build...`);
         return;
       }
 
       // Wait for dependencies to complete before starting the build
       return new Promise<void>((resolve: (value: void | PromiseLike<void>) => void): void => {
-        const checkPendingBuilds: () => void = (): void => {
-          // Check if all dependencies are completed
-          if (!pendingBuilds.every((id: string): boolean => buildStateManager.isBuildCompleted(id))) {
-            setTimeout(checkPendingBuilds, 100);
+        /**
+         * Callback function that is called when a build is completed.
+         *
+         * This function checks two conditions before proceeding:
+         * 1. If the completed build is NOT one of the pending dependencies, the callback ignores it as it's
+         *    unrelated to this package's build process.
+         * 2. If any dependent builds are still running, the build process must continue waiting.
+         *
+         * Only when both conditions are false (the completed build is one of the dependencies AND all
+         * dependent builds are completed), the callback unregisters itself to avoid memory leaks and resolves the
+         * promise to start the current build.
+         */
+        const unregisterCallback: () => void = buildStateManager.onBuildCompleted((identifier: string): void => {
+          if (!pendingBuilds.includes(identifier) || !areDependentBuildsCompleted()) {
             return;
           }
 
+          unregisterCallback();
+
           console.log(`${logPrefix} 🚀 Dependencies resolved, starting build...`);
           resolve();
-        };
-
-        checkPendingBuilds();
+        });
       });
     });
 
