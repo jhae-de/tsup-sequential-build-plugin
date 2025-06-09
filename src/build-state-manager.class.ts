@@ -69,7 +69,8 @@ export class BuildStateManager {
 
   /**
    * Marks a build as completed with the given identifier.
-   * If the build is not registered, it throws an error. It also triggers all registered callbacks for build completion.
+   * If the build is not registered, it throws an error. If the build is already completed, it returns without making
+   * changes. Otherwise, it marks the build as completed and triggers all registered callbacks for build completion.
    *
    * @param {string} identifier - The identifier of the build to mark as completed
    *
@@ -114,8 +115,8 @@ export class BuildStateManager {
   }
 
   /**
-   * Clears all registered and completed builds.
-   * Resets the state of the BuildStateManager.
+   * Clears all registered and completed builds, as well as all registered callbacks.
+   * Completely resets the state of the BuildStateManager to its initial state.
    */
   public clear(): void {
     this.registeredBuilds.clear();
@@ -188,7 +189,7 @@ export class BuildStateManager {
   /**
    * Retrieves all registered builds.
    *
-   * @returns {string[]} An array of identifiers for all registered builds
+   * @returns {readonly string[]} An array of identifiers for all registered builds
    */
   public getRegisteredBuilds(): readonly string[] {
     return Array.from(this.registeredBuilds);
@@ -197,7 +198,7 @@ export class BuildStateManager {
   /**
    * Retrieves all completed builds.
    *
-   * @returns {string[]} An array of identifiers for all completed builds
+   * @returns {readonly string[]} An array of identifiers for all completed builds
    */
   public getCompletedBuilds(): readonly string[] {
     return Array.from(this.completedBuilds);
@@ -207,7 +208,7 @@ export class BuildStateManager {
    * Retrieves all pending builds.
    * A pending build is one that is registered but not completed.
    *
-   * @returns {string[]} An array of identifiers for all pending builds
+   * @returns {readonly string[]} An array of identifiers for all pending builds
    */
   public getPendingBuilds(): readonly string[] {
     return this.getRegisteredBuilds().filter((identifier: string): boolean => !this.completedBuilds.has(identifier));

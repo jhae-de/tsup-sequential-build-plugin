@@ -71,9 +71,9 @@ const createSequentialBuildPlugin: (packageIdentifier: string) => Plugin = (pack
          *    unrelated to this package's build process.
          * 2. If any dependent builds are still running, the build process must continue waiting.
          *
-         * Only when both conditions are false (the completed build is one of the dependencies AND all
-         * dependent builds are completed), the callback unregisters itself to avoid memory leaks and resolves the
-         * promise to start the current build.
+         * Only when both conditions are true (the completed build is one of the dependencies AND all dependent
+         * builds are completed), the callback unregisters itself to avoid memory leaks and resolves the promise to
+         * start the current build.
          */
         const unregisterCallback: () => void = buildStateManager.onBuildCompleted((identifier: string): void => {
           if (!pendingBuilds.includes(identifier) || !areDependentBuildsCompleted()) {
