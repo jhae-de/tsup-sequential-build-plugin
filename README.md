@@ -9,14 +9,20 @@
 A tsup/esbuild plugin that ensures dependent packages in monorepos are built in the correct sequence while maintaining
 parallel format compilation.
 
+This plugin seamlessly integrates with tsup configurations to manage complex monorepo builds. It automatically
+determines the correct build sequence based on package dependencies, ensuring each package builds only after its
+dependencies are complete. This simplifies the build process in monorepos with interdependent packages and reduces build
+errors. The plugin preserves tsup's ability to compile different formats (CommonJS, ESM, etc.) in parallel within each
+package while ensuring the correct build sequence between dependent packages.
+
 Features:
 
-- Ensures dependent packages in monorepos are built in the correct order
-- Supports parallel builds for different formats (cjs, esm, etc.) within a package
-- Automatically waits for dependencies to finish before starting the build
-- Easy integration with existing tsup configurations
-- No extra configuration needed for dependency resolution
-- Supports multiple build sessions via singleton state management
+- Builds dependent packages in monorepos in the correct sequence
+- Maintains parallel builds for different formats (CommonJS, ESM, etc.) within each package
+- Automatically manages build dependencies with intelligent waiting mechanism
+- Integrates seamlessly with existing tsup configurations
+- Provides zero-configuration dependency resolution
+- Maintains build state across multiple sessions via singleton pattern
 
 ## Installation
 
@@ -28,8 +34,9 @@ npm install --save-dev @jhae/tsup-sequential-build-plugin
 
 ## Usage
 
-Using the plugin is straightforward. Just import it and add it to the `esbuildPlugins` array in your `tsup`
-configuration, making sure to pass a unique package identifier (such as the package name) to the plugin:
+Using the plugin is straightforward. Just import it and add it to the `esbuildPlugins` array in your tsup configuration,
+making sure to pass a unique package identifier (such as the package name) to the plugin. This identifier is used to
+track the build status of each package and its dependencies.
 
 ```typescript
 import { createSequentialBuildPlugin } from '@jhae/tsup-sequential-build-plugin';
@@ -57,12 +64,14 @@ export default defineConfig([
 ```
 
 > [!IMPORTANT]
-> Packages are built in the order they are configured in your `tsup` configuration.
+> Packages are built in the order they are configured in the tsup configuration. Ensure that dependent packages are
+> listed after their dependencies to maintain the correct build sequence.
 
 ### Example log output
 
 When running the build, the plugin provides informative log messages to indicate the build status and dependency
-handling:
+handling. Here's an example of what the output might look like when building a monorepo with two packages, `utils` and
+`main`, where `main` depends on `utils` and both packages are built in CommonJS and ESM formats.
 
 ```shell
 [UTILS] CJS ⏳ Waiting for dependencies...
@@ -88,14 +97,17 @@ ESM ⚡️ Build success in 2000ms
 
 ## How it works
 
-The plugin orchestrates the build process for monorepos by managing dependencies between packages:
+The plugin orchestrates the build process for monorepos by managing dependencies between packages and ensuring that they
+are built in the correct order. It does this through a combination of package registration, dependency resolution, and
+parallel format compilation. Here’s a breakdown of the key steps:
 
 - **Package registration**  
-  Each package registers itself with a unique identifier when the build process starts.
+  Each package registers itself with a unique identifier when the build process starts. This identifier is typically the
+  package name, allowing the plugin to track which packages are being built.
 
 - **Dependency resolution**  
-  When a package's build begins, it identifies dependencies based on the configuration order and waits for them to
-  complete before proceeding.
+  When a package's build begins, it identifies dependencies based on the order in the tsup configuration array and waits
+  for them to complete before proceeding.
 
 - **Parallel format compilation**  
   Different formats (cjs, esm) of the same package build in parallel for efficiency, while maintaining the correct
@@ -105,13 +117,13 @@ The plugin orchestrates the build process for monorepos by managing dependencies
   The plugin tracks the status of all builds through a singleton state manager, ensuring that dependent packages only
   start building after their dependencies have completed.
 
-- **Sequential guarantee**  
-  Packages are built in the exact sequence specified in the tsup configuration, ensuring that dependencies are always
-  built before the packages that depend on them.
-
 - **Build status tracking**  
   When a build completes, it updates its status in the shared state, allowing dependent packages to proceed with their
   builds.
 
-This approach maintains build integrity in complex monorepos while optimizing build performance through parallel format
-compilation.
+- **Sequential guarantee**  
+  Packages are built in the exact sequence specified in the tsup configuration, ensuring that dependencies are always
+  built before the packages that depend on them.
+
+This architectural approach ensures packages are built in the correct dependency sequence while leveraging concurrent
+format compilation, delivering both reliability and performance without requiring complex configuration.
