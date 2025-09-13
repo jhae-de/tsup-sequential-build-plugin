@@ -10,6 +10,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Simplified `Set` initializations
+- Enhanced error message for unregistered builds
 
 ## [1.1.1] - 2025-06-09
 

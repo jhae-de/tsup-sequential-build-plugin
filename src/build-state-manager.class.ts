@@ -76,7 +76,7 @@ export class BuildStateManager {
    */
   public completeBuild(identifier: string): void {
     if (!this.registeredBuilds.has(identifier)) {
-      throw new Error(`Build ${identifier} not registered`);
+      throw new Error(`Build "${identifier}" not registered`);
     }
 
     if (this.completedBuilds.has(identifier)) {
@@ -95,7 +95,7 @@ export class BuildStateManager {
    * @example
    * ```typescript
    * const unregister: () => void = buildStateManager.onBuildCompleted((identifier: string): void => {
-   *   console.log(`Build ${identifier} completed`);
+   *   console.log(`Build "${identifier}" completed`);
    * });
    *
    * // Later, when you want to stop listening for build completions:
