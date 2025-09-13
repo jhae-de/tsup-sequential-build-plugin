@@ -1,11 +1,11 @@
-import { rmSync } from 'node:fs';
+import { readdirSync, rmSync } from 'node:fs';
 import { defineConfig, type Format, type Options } from 'tsup';
 import { createProgram } from 'typescript';
 
 const entry: string[] = ['./src/index.ts'];
 const outDir: string = './dist';
 const declarationDir: string = './types';
-const excludedDeclarationFiles: string[] = ['build-state-manager.class.d.ts'];
+const declarationFiles: string[] = ['index.d.ts'];
 
 export default defineConfig({
   entry,
@@ -28,9 +28,13 @@ export default defineConfig({
             emitDeclarationOnly: true,
           }).emit();
 
-          excludedDeclarationFiles.forEach((file: string): void =>
-            rmSync(`./${declarationDir}/${file}`, { force: true }),
-          );
+          readdirSync(declarationDir).forEach((file: string): void => {
+            if (declarationFiles.includes(file)) {
+              return;
+            }
+
+            rmSync(`./${declarationDir}/${file}`, { force: true });
+          });
 
           resolve();
         } catch (error) {
