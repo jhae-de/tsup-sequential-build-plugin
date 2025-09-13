@@ -21,6 +21,10 @@
     "require": "./dist/index.cjs",
     "default": "./dist/index.mjs"
   },
+  "files": [
+    "./dist/",
+    "./types/"
+  ],
   "scripts": {
     "build": "tsup",
     "fix": "npm run-script fix:prettier && npm run-script fix:eslint",
