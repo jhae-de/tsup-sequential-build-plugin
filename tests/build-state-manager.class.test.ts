@@ -56,7 +56,7 @@ describe('BuildStateManager', (): void => {
 
     it('throws an error when completing an unregistered build', (): void => {
       expect((): void => buildStateManager.completeBuild('build-identifier')).toThrow(
-        'Build build-identifier not registered',
+        'Build "build-identifier" not registered',
       );
     });
 
