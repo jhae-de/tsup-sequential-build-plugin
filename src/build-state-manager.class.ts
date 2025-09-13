@@ -15,22 +15,20 @@ export class BuildStateManager {
    * A set containing the identifiers of registered builds.
    * Builds are added to this set when they are registered.
    */
-  private readonly registeredBuilds: Set<string> = new Set<string>();
+  private readonly registeredBuilds: Set<string> = new Set();
 
   /**
    * A set containing the identifiers of completed builds.
    * Builds are added to this set when they are marked as completed.
    */
-  private readonly completedBuilds: Set<string> = new Set<string>();
+  private readonly completedBuilds: Set<string> = new Set();
 
   /**
    * A set of callbacks that are called when a build is completed.
    * Callbacks are registered using the onBuildCompleted method and are called with the identifier of the completed
    * build.
    */
-  private readonly buildCompletionCallbacks: Set<(identifier: string) => void> = new Set<
-    (identifier: string) => void
-  >();
+  private readonly buildCompletionCallbacks: Set<(identifier: string) => void> = new Set();
 
   /**
    * Private constructor to prevent direct instantiation.
