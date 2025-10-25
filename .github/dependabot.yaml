@@ -3,9 +3,9 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-      day: saturday
-      time: '04:00'
+      interval: cron
+      cronjob: '0 4 * * 6'
+      timezone: Europe/Berlin
     groups:
       version-updates:
         applies-to: version-updates
