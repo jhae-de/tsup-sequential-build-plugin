@@ -24,3 +24,6 @@ jobs:
       upload-coverage: true
     secrets:
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
+
+permissions:
+  contents: read
