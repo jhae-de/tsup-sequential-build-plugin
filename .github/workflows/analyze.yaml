@@ -14,13 +14,13 @@ jobs:
     name: Lint
     uses: jhae-de/jhae-de/.github/workflows/node-project-lint.yaml@main
     with:
-      node-version: 22
+      node-version: 24
 
   test:
     name: Test
     uses: jhae-de/jhae-de/.github/workflows/node-project-test.yaml@main
     with:
-      node-version: 22
+      node-version: 24
       upload-coverage: true
     secrets:
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
