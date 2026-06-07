@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/jhae-de/node:22
+    image: ghcr.io/jhae-de/node:24
     container_name: ${COMPOSE_PROJECT_NAME:-tsup-sequential-build-plugin}-app
     environment:
       HISTFILE: /home/user/workspace/.bash-history
