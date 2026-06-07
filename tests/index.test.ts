@@ -66,14 +66,18 @@ function validatePluginSetup(setup: PluginTestSetup): void {
 }
 
 const buildStateManager: BuildStateManager = BuildStateManager.getInstance();
-const registerBuildSpy: jest.SpyInstance = jest.spyOn(buildStateManager, 'registerBuild');
-const completeBuildSpy: jest.SpyInstance = jest.spyOn(buildStateManager, 'completeBuild');
 
-jest.spyOn(console, 'log').mockImplementation((): void => {});
+let registerBuildSpy: jest.SpyInstance;
+let completeBuildSpy: jest.SpyInstance;
 
-beforeEach((): void => buildStateManager.clear());
-afterEach((): void => void jest.clearAllMocks());
-afterAll((): void => void jest.restoreAllMocks());
+beforeEach((): void => {
+  buildStateManager.clear();
+
+  registerBuildSpy = jest.spyOn(buildStateManager, 'registerBuild');
+  completeBuildSpy = jest.spyOn(buildStateManager, 'completeBuild');
+
+  jest.spyOn(console, 'log').mockImplementation((): void => {});
+});
 
 describe('SequentialBuildPlugin', (): void => {
   it('uses "unknown" when format is missing in options', (): void => {

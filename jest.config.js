@@ -3,7 +3,6 @@ import { createDefaultPreset } from 'ts-jest';
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 const config = {
   ...createDefaultPreset(),
-  coveragePathIgnorePatterns: ['<rootDir>/node_modules'],
   coverageThreshold: {
     global: {
       branches: 100,
@@ -12,6 +11,8 @@ const config = {
       statements: 100,
     },
   },
+  resetMocks: true,
+  restoreMocks: true,
 };
 
 export default config;
