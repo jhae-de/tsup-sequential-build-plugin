@@ -4,6 +4,15 @@
 ![Tests](https://img.shields.io/github/actions/workflow/status/jhae-de/tsup-sequential-build-plugin/analyze.yaml?label=Tests&labelColor=%23404850)
 ![Coverage](https://img.shields.io/codecov/c/github/jhae-de/tsup-sequential-build-plugin/main?label=Coverage&labelColor=%23404850)
 
+> [!WARNING]
+> This repository is no longer maintained and was archived on August 16, 2026.
+>
+> [tsup](https://github.com/egoist/tsup) is no longer maintained, so development of this plugin has been discontinued.
+> The npm package [@jhae/tsup-sequential-build-plugin](https://npmjs.com/package/@jhae/tsup-sequential-build-plugin)
+> remains usable with existing tsup installations.
+
+---
+
 # tsup Sequential Build Plugin
 
 A tsup/esbuild plugin that ensures dependent packages in monorepos are built in the correct sequence while maintaining
