@@ -31,7 +31,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Initial release
 
-[Unreleased]: https://github.com/jhae-de/tsup-sequential-build-plugin/compare/v1.1.2...main
 [1.1.2]: https://github.com/jhae-de/tsup-sequential-build-plugin/releases/tag/v1.1.2
 [1.1.1]: https://github.com/jhae-de/tsup-sequential-build-plugin/releases/tag/v1.1.1
 [1.1.0]: https://github.com/jhae-de/tsup-sequential-build-plugin/releases/tag/v1.1.0
